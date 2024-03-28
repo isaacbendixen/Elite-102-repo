@@ -1,1 +1,3 @@
-name = input("What's your name?")
+name = input("What's your name? ")
+
+print(f"Hi there {name}!")

@@ -39,8 +39,6 @@ def view_account(myName, myPassword):
 
             print(f"Name of account: {item[1]}")
 
-            print(f"Balance of account: {item[2]}")
-
             print(f"Password of account: {item[3]}")
 
             print(f"Email of account: {item[4]}")
@@ -55,22 +53,18 @@ def view_account(myName, myPassword):
         cursor.execute(f"select * from banking.accounts where name = '{myName}' and password = '{myPassword}'")
 
         for item in cursor:
-            thing = item
 
+            print()
 
-        print()
+            print(f"Name of account: {item[1]}")
 
-        print(f"Name of account: {thing[1]}")
+            print(f"Password of account: {item[3]}")
 
-        print(f"Balance of account: {thing[2]}")
+            print(f"Email of account: {item[4]}")
 
-        print(f"Password of account: {thing[3]}")
-
-        print(f"Email of account: {thing[4]}")
-
-        print(f"PIN of account: {thing[5]}")
+            print(f"PIN of account: {item[5]}")
             
-        print()
+            print()
 
         input("Enter anything to continue: ")
         os.system("cls")
@@ -100,7 +94,7 @@ def mod_account(myName, myPassword):
     new_email = input("New account email: ")
     new_PIN = int(input("New account PIN: "))
 
-    cursor.execute(f"update banking.accounts set name = '{new_name}', password = '{new_password}', email = '{new_email}', PIN = '{new_PIN}' where id = '{iden}")
+    cursor.execute(f"update banking.accounts set name = '{new_name}', password = '{new_password}', email = '{new_email}', PIN = '{new_PIN}' where id = '{iden}'")
 
     connection.commit()
 
@@ -121,7 +115,7 @@ def delete_account(myName, myPassword):
 
     name = myName
 
-    delete = input("Are you sure you want to continue?")
+    delete = input("Are you sure you want to continue? ")
 
     if delete.lower()[0] == "y":
         cursor.execute(f"delete from banking.accounts where name = '{name}' and password = '{myPassword}'")
@@ -139,13 +133,115 @@ def delete_account(myName, myPassword):
 # All functions dealing with balance
 # ie; checking, deposits, withdrawals
 def check_balance(myName, myPassword):
-    pass
+    
+    # Check if command account that can see everything
+    if myName.lower() == "command":
+        print("\nEverything:")
+        cursor.execute("select * from banking.accounts")
+        for item in cursor:
+            print()
+
+            print(f"Name of account: {item[1]}")
+
+            print(f"Balance of account: ${item[2]}")
+            
+        print()
+        input("Enter anything to continue: ")
+        os.system("cls")
+        return
+    else:
+        cursor.execute(f"select * from banking.accounts where name = '{myName}' and password = '{myPassword}'")
+
+        for item in cursor:
+            thing = item
+
+
+        print()
+
+        print(f"Name of account: {thing[1]}")
+
+        print(f"Balance of account: ${thing[2]}")
+            
+        print()
+
+        input("Enter anything to continue: ")
+        os.system("cls")
+        return
+    
+    print("No accounts available")
+
+    input("Enter anything to continue: ")
+
+    os.system("cls")
 
 def deposit(myName, myPassword):
-    pass
+    if myName == "command":
+        print("This account cannot be deposited to")
+
+        time.sleep(1)
+
+        return
+    
+    amount = float(input("Amount to deposit: "))
+
+    cursor.execute(f"select balance from banking.accounts where name = '{myName}' and password = '{myPassword}'")
+
+    for item in cursor:
+        cur_bal = item[0]
+    
+    bal = amount + cur_bal
+
+    cursor.execute(f"update banking.accounts set balance = {bal} where name = '{myName}' and password = '{myPassword}'")
+
+    connection.commit()
+
+    print("Money deposited\n")
+
+    input("Enter anything to continue: ")
+
+    os.system("cls")
 
 def withdraw(myName, myPassword):
-    pass
+    if myName == "command":
+        print("This account cannot be withdrawn from")
+
+        time.sleep(1)
+
+        return
+    
+    amount = float(input("Amount to withdraw: "))
+
+    cursor.execute(f"select balance from banking.accounts where name = '{myName}' and password = '{myPassword}'")
+
+    for item in cursor:
+        cur_bal = item[0]
+    
+    bal = cur_bal - amount
+
+    if bal < 0:
+        print("Insufficient funds to withdraw that amount. Withdrawing all available funds\n")
+
+        cursor.execute(f"update banking.accounts set balance = {0} where name = '{myName}' and password = '{myPassword}'")
+
+        connection.commit()
+
+        print(f"New balance: $0.00\n")
+
+        input("Enter anything to continue: ")
+
+        os.system("cls")
+    else:
+        print("Withdrawing funds")
+
+        cursor.execute(f"update banking.accounts set balance = {bal} where name = '{myName}' and password = '{myPassword}'")
+
+        connection.commit()
+
+        print(f"New balance: ${bal}\n")
+
+        input("Enter anything to continue: ")
+
+        os.system("cls")
 
 ###########################################################################################3
 
@@ -180,8 +276,10 @@ def sign_in():
 while True:
 
     # First choices: signing in or creating an account
-    print("\n1. Sign in\n2. Create account")
-    choice1 = int(input("Choose: "))
+    print("\n1. Sign in\n2. Create account\n")
+    choice1 = int(input("Choose (-1 to end program): "))
+
+    os.system("cls")
 
     if choice1 == -1:
         break
@@ -192,8 +290,8 @@ while True:
 
             # If signing in works, then options for manipulating account and balance of account
             while True:
-                print("1. View account\n2. Modify account\n3. Delete account")
-                choice2 = int(input("Choose: "))
+                print("1. View account\n2. Modify account\n3. Delete account\n\n4. View balance\n5. Deposit money\n6. Withdraw money\n")
+                choice2 = int(input("Choose (-1 to sign out): "))
 
                 if choice2 == -1:
                     break
@@ -203,6 +301,12 @@ while True:
                     mod_account(user_name, password)
                 elif choice2 == 3:
                     delete_account(user_name, password)
+                elif choice2 == 4:
+                    check_balance(user_name, password)
+                elif choice2 == 5:
+                    deposit(user_name, password)
+                elif choice2 == 6:
+                    withdraw(user_name, password)
                 else:
                     print("Invalid")
     

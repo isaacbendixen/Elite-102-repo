@@ -271,12 +271,13 @@ def sign_in():
         print("Account doesn't exist")
         return False
 
+os.system("cls")
 
 # Main loop that repeats all the functions
 while True:
 
     # First choices: signing in or creating an account
-    print("\n1. Sign in\n2. Create account\n")
+    print("1. Sign in\n2. Create account\n")
     choice1 = int(input("Choose (-1 to end program): "))
 
     os.system("cls")
